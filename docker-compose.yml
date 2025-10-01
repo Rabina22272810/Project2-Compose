@@ -1,4 +1,3 @@
-version: "3:9"
 
 services:
   dind:
@@ -10,11 +9,13 @@ services:
     volumes:
       - dind-storage:/var/lib/docker
       - docker-certs-ca:/certs/ca
-      - docker-certs-client:/certs/clinet
+      - docker-certs-client:/certs/client
     command: ["--storage-driver=overlay2"]
-    networks: [jenkins]
+    networks: 
+      jenkins:
+        aliases: [docker]
 
-netwoks:
+networks:
   jenkins: {}
 
 volumes:
