@@ -1,32 +1,42 @@
 
+#Task 2
+#Set Up Docker Compose for Jenkins and DinD
+# - dind: secure Docker engine (TLS) that Jenkins talks to over tcp://docker:2376
+# - jenkins : Jenkins LTS; uses the Dind engine to builds images and run pipelines
+# Named volumes: 
+# -dind-storage:persists Docker image layers/cache
+# -docker-certs-*: stores TLS CA/client certs
+# -jenkins-data: persists Jenkins config, jobs, plugins
 services:
+#Dind service that permits Docker commands from Jenkins safely
   dind:
     image: docker:dind
     container_name: dind
-    privileged: true
+    privileged: true               #so inner Docker daemon can run
     environment:
-      DOCKER_TLS_CERTDIR: /certs
+      DOCKER_TLS_CERTDIR: /certs   # enables TLS & auto-generate certs
     volumes:
       - dind-storage:/var/lib/docker
       - docker-certs-ca:/certs/ca
       - docker-certs-client:/certs/client
-    command: ["--storage-driver=overlay2"]
+    command: ["--storage-driver=overlay2"]  #stable storage driver for DinD
     networks: 
       jenkins:
-        aliases: [docker]
+        aliases: [docker]               #reachable as tcp://docker:2376
+#Jenkins service that uses DinD to build images and run pipelines
   jenkins:
     image: jenkins/jenkins:lts-jdk11
     container_name: jenkins
-    user: root
+    user: root                         #allow reading mounted certs
     ports:
-      - "8080:8080"
-      - "50000:50000"
+      - "8080:8080"                    #Jenkins UI
     environment:
-      DOCKER_HOST: "tcp://docker:2376"
+      DOCKER_HOST: "tcp://docker:2376"  # talk to DinD by network alias
       DOCKER_CERT_PATH: "/certs/client"
       DOCKER_TLS_VERIFY: "1"
     volumes:
       - docker-certs-client:/certs/client:ro
+      - jenkins-data:/var/jenkins_home    #Jenkins home
     networks:
       jenkins: {}
     depends_on:
@@ -40,4 +50,5 @@ volumes:
   dind-storage:
   docker-certs-ca:
   docker-certs-client:
+  jenkins-data:
 
