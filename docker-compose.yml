@@ -30,6 +30,7 @@ services:
     user: root                         #allow reading mounted certs
     ports:
       - "8080:8080"                    #Jenkins UI
+      - "50000:50000"                  # inbound agents
     environment:
       DOCKER_HOST: "tcp://docker:2376"  # talk to DinD by network alias
       DOCKER_CERT_PATH: "/certs/client"
