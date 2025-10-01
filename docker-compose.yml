@@ -1,0 +1,24 @@
+version: "3:9"
+
+services:
+  dind:
+    image: docker:dind
+    container_name: dind
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    volumes:
+      - dind-storage:/var/lib/docker
+      - docker-certs-ca:/certs/ca
+      - docker-certs-client:/certs/clinet
+    command: ["--storage-driver=overlay2"]
+    networks: [jenkins]
+
+netwoks:
+  jenkins: {}
+
+volumes:
+  dind-storage:
+  docker-certs-ca:
+  docker-certs-client:
+
